@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.kalab.chess.enginesupport.test"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="9" />
+
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.kalab.chess.enginesupport.test" />
+
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <uses-library android:name="android.test.runner" />
+
+        <activity android:name="com.kalab.chess.example.ExampleActivity" >
+            <intent-filter>
+                <action android:name="intent.chess.provider.ENGINE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="chess.provider.enginelist.xml"
+                android:resource="@xml/enginelist" />
+            <meta-data
+                android:name="chess.provider.engine.authority"
+                android:value="com.kalab.chess.example.ExampleEngineProvider" />
+        </activity>
+
+        <provider
+            android:name="com.kalab.chess.example.ExampleEngineProvider"
+            android:authorities="com.kalab.chess.example.ExampleEngineProvider" >
+        </provider>
+    </application>
+
+</manifest>
