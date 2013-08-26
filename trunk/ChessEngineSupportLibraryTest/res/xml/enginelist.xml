@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enginelist>
+
+    <engine
+        name="Example Engine v1.0"
+        filename="example_engine.jet"
+        target="arm"
+        type="uci" />
+    <engine
+        name="Second Engine"
+        filename="second_engine.jet"
+        target="x86"
+        type="uci" />
+
+</enginelist>
