@@ -24,31 +24,36 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources.NotFoundException;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.util.Log;
 
-public class EngineResolver {
+public class ChessEngineResolver {
 
 	private static final String ENGINE_PROVIDER_MARKER = "intent.chess.provider.ENGINE";
-	private static final String TAG = EngineResolver.class.getSimpleName();
+	private static final String TAG = ChessEngineResolver.class.getSimpleName();
+	private Context context;
 
-	public List<Engine> resolveEngines(Context context) {
-		List<Engine> result = new ArrayList<Engine>();
+	public ChessEngineResolver(Context context) {
+		super();
+		this.context = context;
+	}
+
+	public List<ChessEngine> resolveEngines() {
+		List<ChessEngine> result = new ArrayList<ChessEngine>();
 		final Intent intent = new Intent(ENGINE_PROVIDER_MARKER);
 		List<ResolveInfo> list = context.getPackageManager()
 				.queryIntentActivities(intent, PackageManager.GET_META_DATA);
 		for (ResolveInfo resolveInfo : list) {
 			String packageName = resolveInfo.activityInfo.packageName;
-			result = resolveEnginesForPackage(context, result, resolveInfo,
-					packageName);
+			result = resolveEnginesForPackage(result, resolveInfo, packageName);
 		}
 		return result;
 	}
 
-	private List<Engine> resolveEnginesForPackage(Context context,
-			List<Engine> result, ResolveInfo resolveInfo, String packageName) {
+	private List<ChessEngine> resolveEnginesForPackage(List<ChessEngine> result,
+			ResolveInfo resolveInfo, String packageName) {
 		if (packageName != null) {
 			Log.d(TAG, "found engine provider, packageName=" + packageName);
 			Bundle bundle = resolveInfo.activityInfo.metaData;
@@ -57,17 +62,15 @@ public class EngineResolver {
 						.getString("chess.provider.engine.authority");
 				Log.d(TAG, "authority=" + authority);
 				if (authority != null) {
-					Integer resourceId = bundle
-							.getInt("chess.provider.enginelist.xml");
 					try {
-						XmlResourceParser parser = context
+						Resources resources = context
 								.getPackageManager()
 								.getResourcesForApplication(
-										resolveInfo.activityInfo.applicationInfo)
-								.getXml(resourceId);
+										resolveInfo.activityInfo.applicationInfo);
+						int resId = resources.getIdentifier("enginelist",
+								"xml", packageName);
+						XmlResourceParser parser = resources.getXml(resId);
 						parseEngineListXml(parser, authority, result);
-					} catch (NotFoundException e) {
-						Log.e(TAG, e.getLocalizedMessage(), e);
 					} catch (NameNotFoundException e) {
 						Log.e(TAG, e.getLocalizedMessage(), e);
 					}
@@ -78,7 +81,7 @@ public class EngineResolver {
 	}
 
 	private void parseEngineListXml(XmlResourceParser parser, String authority,
-			List<Engine> result) throws NameNotFoundException {
+			List<ChessEngine> result) {
 		try {
 			int eventType = parser.getEventType();
 			while (eventType != XmlResourceParser.END_DOCUMENT) {
@@ -93,7 +96,7 @@ public class EngineResolver {
 							String title = parser.getAttributeValue(null,
 									"name");
 							Log.d(TAG, "name=" + title);
-							result.add(new Engine(title, fileName, authority));
+							result.add(new ChessEngine(title, fileName, authority));
 						}
 					}
 					eventType = parser.next();

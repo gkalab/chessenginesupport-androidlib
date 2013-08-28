@@ -24,11 +24,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-public class EngineProvider extends ContentProvider {
+public class ChessEngineProvider extends ContentProvider {
 
 	private static final String MIME_TYPE = "application/x-chess-engine";
 	private static final String UNSUPPORTED = "Not supported by this provider";
-	private static final String TAG = EngineProvider.class.getSimpleName();
+	private static final String TAG = ChessEngineProvider.class.getSimpleName();
 
 	@Override
 	public boolean onCreate() {

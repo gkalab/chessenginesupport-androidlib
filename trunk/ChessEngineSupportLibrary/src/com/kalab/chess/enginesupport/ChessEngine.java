@@ -23,15 +23,15 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.util.Log;
 
-public class Engine {
+public class ChessEngine {
 
-	private static final String TAG = Engine.class.getSimpleName();
+	private static final String TAG = ChessEngine.class.getSimpleName();
 
 	private String name;
 	private String fileName;
 	private String authority;
 
-	public Engine(String name, String fileName, String authority) {
+	public ChessEngine(String name, String fileName, String authority) {
 		this.name = name;
 		this.fileName = fileName;
 		this.authority = authority;
@@ -69,9 +69,9 @@ public class Engine {
 			throws FileNotFoundException, IOException {
 		FileOutputStream fout = new FileOutputStream(targetFilePath);
 		byte[] b = new byte[1024];
-		int noOfBytes = 0;
-		while ((noOfBytes = istream.read(b)) != -1) {
-			fout.write(b, 0, noOfBytes);
+		int numBytes = 0;
+		while ((numBytes = istream.read(b)) != -1) {
+			fout.write(b, 0, numBytes);
 		}
 		istream.close();
 		fout.close();

@@ -7,17 +7,17 @@ import java.util.List;
 
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.kalab.chess.enginesupport.Engine;
-import com.kalab.chess.enginesupport.EngineResolver;
+import com.kalab.chess.enginesupport.ChessEngine;
+import com.kalab.chess.enginesupport.ChessEngineResolver;
 import com.kalab.chess.example.ExampleActivity;
 
-public class EngineResolverTest extends
+public class ChessEngineResolverTest extends
 		ActivityInstrumentationTestCase2<ExampleActivity> {
 
-	private EngineResolver resolver;
-	private List<Engine> engines;
+	private ChessEngineResolver resolver;
+	private List<ChessEngine> engines;
 
-	public EngineResolverTest() {
+	public ChessEngineResolverTest() {
 		super(ExampleActivity.class);
 	}
 
@@ -65,11 +65,11 @@ public class EngineResolverTest extends
 	}
 
 	private void givenAnEngineResolver() {
-		this.resolver = new EngineResolver();
+		this.resolver = new ChessEngineResolver(this.getActivity());
 	}
 
 	private void whenResolvingEngines() {
-		this.engines = this.resolver.resolveEngines(this.getActivity());
+		this.engines = this.resolver.resolveEngines();
 	}
 
 	private void thenEnginesAreResolved() {
@@ -77,18 +77,18 @@ public class EngineResolverTest extends
 	}
 
 	private void thenNameOfFirstEngineIs(String expected) {
-		Engine firstEngine = this.engines.get(0);
+		ChessEngine firstEngine = this.engines.get(0);
 		assertEquals(expected, firstEngine.getName());
 	}
 
 	private void thenFileNameOfFirstEngineIs(String expected) {
-		Engine firstEngine = this.engines.get(0);
+		ChessEngine firstEngine = this.engines.get(0);
 		assertEquals(expected, firstEngine.getFileName());
 	}
 
 	private void thenFileOfFirstEngineCanBeRetrieved()
 			throws FileNotFoundException, IOException {
-		Engine firstEngine = this.engines.get(0);
+		ChessEngine firstEngine = this.engines.get(0);
 		File copiedEngine = firstEngine.copyToFiles(this.getActivity()
 				.getContentResolver(), this.getActivity().getFilesDir());
 		assertTrue(copiedEngine.exists());
@@ -96,7 +96,7 @@ public class EngineResolverTest extends
 
 	private void thenFileOfFirstEngineIsExecutable()
 			throws FileNotFoundException, IOException {
-		Engine firstEngine = this.engines.get(0);
+		ChessEngine firstEngine = this.engines.get(0);
 		File copiedEngine = firstEngine.copyToFiles(this.getActivity()
 				.getContentResolver(), this.getActivity().getFilesDir());
 		assertTrue(copiedEngine.canExecute());
@@ -104,7 +104,7 @@ public class EngineResolverTest extends
 
 	private void thenRetrievingOfMissingFileThrowsFileNotFoundException()
 			throws IOException {
-		Engine secondEngine = this.engines.get(1);
+		ChessEngine secondEngine = this.engines.get(1);
 		boolean thrown = false;
 		try {
 			secondEngine.copyToFiles(this.getActivity().getContentResolver(),
