@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<enginelist>
+
+    <engine
+        name="Stockfish 4 arm"
+        filename="stockfish-4-android.armeabi.jet"
+        target="armeabi" />
+    <engine
+        name="Stockfish 4 armv7a"
+        filename="stockfish-4-android.armeabi-v7a.jet"
+        target="armeabi-v7a" />
+    <engine
+        name="Stockfish 4 x86"
+        filename="stockfish-4-android.x86.jet"
+        target="x86" />
+    
+</enginelist>
