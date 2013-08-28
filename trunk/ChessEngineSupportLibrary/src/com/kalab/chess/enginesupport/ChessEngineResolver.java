@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -34,10 +35,12 @@ public class ChessEngineResolver {
 	private static final String ENGINE_PROVIDER_MARKER = "intent.chess.provider.ENGINE";
 	private static final String TAG = ChessEngineResolver.class.getSimpleName();
 	private Context context;
+	private String target;
 
 	public ChessEngineResolver(Context context) {
 		super();
 		this.context = context;
+		this.target = Build.CPU_ABI;
 	}
 
 	public List<ChessEngine> resolveEngines() {
@@ -52,8 +55,9 @@ public class ChessEngineResolver {
 		return result;
 	}
 
-	private List<ChessEngine> resolveEnginesForPackage(List<ChessEngine> result,
-			ResolveInfo resolveInfo, String packageName) {
+	private List<ChessEngine> resolveEnginesForPackage(
+			List<ChessEngine> result, ResolveInfo resolveInfo,
+			String packageName) {
 		if (packageName != null) {
 			Log.d(TAG, "found engine provider, packageName=" + packageName);
 			Bundle bundle = resolveInfo.activityInfo.metaData;
@@ -92,11 +96,17 @@ public class ChessEngineResolver {
 						if (name.equalsIgnoreCase("engine")) {
 							String fileName = parser.getAttributeValue(null,
 									"filename");
-							Log.d(TAG, "filename=" + fileName);
 							String title = parser.getAttributeValue(null,
 									"name");
-							Log.d(TAG, "name=" + title);
-							result.add(new ChessEngine(title, fileName, authority));
+							String targetSpecification = parser
+									.getAttributeValue(null, "target");
+							String[] targets = targetSpecification.split("\\|");
+							for (String cpuTarget : targets) {
+								if (target.equals(cpuTarget)) {
+									result.add(new ChessEngine(title, fileName,
+											authority));
+								}
+							}
 						}
 					}
 					eventType = parser.next();
@@ -107,5 +117,16 @@ public class ChessEngineResolver {
 		} catch (XmlPullParserException e) {
 			Log.e(TAG, e.getLocalizedMessage(), e);
 		}
+	}
+
+	/**
+	 * Don't use this in production - this method is only for testing. Set the
+	 * cpu target.
+	 * 
+	 * @param target
+	 *            the cpu target to set
+	 */
+	public void setTarget(String target) {
+		this.target = target;
 	}
 }

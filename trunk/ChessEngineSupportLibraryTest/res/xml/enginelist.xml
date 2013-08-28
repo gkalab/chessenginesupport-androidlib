@@ -3,13 +3,23 @@
 
     <engine
         name="Example Engine v1.0"
-        filename="example_engine.jet"
-        target="arm"
+        filename="example_engine_armv7.jet"
+        target="armeabi-v7a"
         type="uci" />
     <engine
         name="Second Engine"
-        filename="second_engine.jet"
+        filename="example_engine_arm.jet"
+        target="armeabi|armeabi-v7a"
+        type="uci" />
+    <engine
+        name="Third Engine"
+        filename="example_engine_x86.jet"
         target="x86"
         type="uci" />
-
+    <engine
+        name="Missing Engine"
+        filename="missing_engine.jet"
+        target="armeabi"
+        type="uci" />
+    
 </enginelist>

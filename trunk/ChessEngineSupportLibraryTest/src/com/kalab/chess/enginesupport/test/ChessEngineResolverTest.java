@@ -31,16 +31,28 @@ public class ChessEngineResolverTest extends
 		thenEnginesAreResolved();
 	}
 
-	public void testNameOfFirstEngine() {
+	public void testNameForTargetIsRetrieved_WhenSpecifyingX86() {
 		givenAnEngineResolver();
-		whenResolvingEngines();
-		thenNameOfFirstEngineIs("Example Engine v1.0");
+		whenResolvingEnginesForTarget("x86");
+		thenResolvedEngineNamesStringIs("Third Engine");
 	}
 
-	public void testFileNameOfFirstEngine() {
+	public void testResolverReturnsX86TargetEngines_WhenSpecifyingX86() {
 		givenAnEngineResolver();
-		whenResolvingEngines();
-		thenFileNameOfFirstEngineIs("example_engine.jet");
+		whenResolvingEnginesForTarget("x86");
+		thenResolvedEnginesStringIs("example_engine_x86.jet");
+	}
+
+	public void testResolverReturnsAllArmTargetEngines_WhenSpecifyingArm() {
+		givenAnEngineResolver();
+		whenResolvingEnginesForTarget("armeabi");
+		thenResolvedEnginesStringIs("example_engine_arm.jet missing_engine.jet");
+	}
+
+	public void testResolverReturnsAllArmV7TargetEngines_WhenSpecifyingArmV7() {
+		givenAnEngineResolver();
+		whenResolvingEnginesForTarget("armeabi-v7a");
+		thenResolvedEnginesStringIs("example_engine_armv7.jet example_engine_arm.jet");
 	}
 
 	public void testFileOfFirstEngineCanBeRetrieved()
@@ -60,7 +72,7 @@ public class ChessEngineResolverTest extends
 	public void testFileOfSecondEngineCannotBeRetrievedIfFileIsMissing()
 			throws FileNotFoundException, IOException {
 		givenAnEngineResolver();
-		whenResolvingEngines();
+		whenResolvingEnginesForTarget("armeabi");
 		thenRetrievingOfMissingFileThrowsFileNotFoundException();
 	}
 
@@ -69,6 +81,11 @@ public class ChessEngineResolverTest extends
 	}
 
 	private void whenResolvingEngines() {
+		this.engines = this.resolver.resolveEngines();
+	}
+
+	private void whenResolvingEnginesForTarget(String target) {
+		this.resolver.setTarget(target);
 		this.engines = this.resolver.resolveEngines();
 	}
 
@@ -104,14 +121,30 @@ public class ChessEngineResolverTest extends
 
 	private void thenRetrievingOfMissingFileThrowsFileNotFoundException()
 			throws IOException {
-		ChessEngine secondEngine = this.engines.get(1);
+		ChessEngine missingEngine = this.engines.get(this.engines.size() - 1);
 		boolean thrown = false;
 		try {
-			secondEngine.copyToFiles(this.getActivity().getContentResolver(),
+			missingEngine.copyToFiles(this.getActivity().getContentResolver(),
 					this.getActivity().getFilesDir());
 		} catch (FileNotFoundException e) {
 			thrown = true;
 		}
 		assertTrue("should have thrown FileNotFoundException", thrown);
+	}
+
+	private void thenResolvedEnginesStringIs(String expected) {
+		String engines = "";
+		for (ChessEngine engine : this.engines) {
+			engines += engine.getFileName() + " ";
+		}
+		assertEquals(expected, engines.trim());
+	}
+
+	private void thenResolvedEngineNamesStringIs(String expected) {
+		String names = "";
+		for (ChessEngine engine : this.engines) {
+			names += engine.getName() + " ";
+		}
+		assertEquals(expected, names.trim());
 	}
 }
