@@ -22,9 +22,6 @@
             </intent-filter>
 
             <meta-data
-                android:name="chess.provider.enginelist.xml"
-                android:resource="@xml/enginelist" />
-            <meta-data
                 android:name="chess.provider.engine.authority"
                 android:value="com.kalab.chess.example.ExampleEngineProvider" />
         </activity>
