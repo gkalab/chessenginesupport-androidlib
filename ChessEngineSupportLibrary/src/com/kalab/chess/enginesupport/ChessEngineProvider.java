@@ -13,6 +13,7 @@
  */
 package com.kalab.chess.enginesupport;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -22,6 +23,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 public class ChessEngineProvider extends ContentProvider {
@@ -47,12 +49,29 @@ public class ChessEngineProvider extends ContentProvider {
 		try {
 			descriptor = manager.openFd(fileName);
 		} catch (IOException e) {
-			String msg = "Error opening file " + fileName;
-			Log.e(TAG, msg, e);
-			throw new FileNotFoundException(msg + "\n"
-					+ e.getLocalizedMessage());
+			Log.d(TAG,
+					"Engine file <"
+							+ fileName
+							+ "> was not found in assets, trying to load from libraries.");
+			String libFileName = getContext().getApplicationInfo().dataDir
+					+ File.separator + "lib" + File.separator + fileName;
+			try {
+				descriptor = new AssetFileDescriptor(openLibFile(new File(
+						libFileName)), 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+			} catch (IOException ex) {
+				String msg = "Error opening file <" + libFileName + ">.";
+				Log.e(TAG, msg, ex);
+				throw new FileNotFoundException(msg + "\n"
+						+ ex.getLocalizedMessage());
+			}
 		}
 		return descriptor;
+	}
+
+	public ParcelFileDescriptor openLibFile(File f)
+			throws FileNotFoundException {
+		return ParcelFileDescriptor
+				.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
 	}
 
 	@Override

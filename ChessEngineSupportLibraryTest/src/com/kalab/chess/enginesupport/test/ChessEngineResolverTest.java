@@ -23,57 +23,56 @@ public class ChessEngineResolverTest extends
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		givenAnEngineResolver();
 	}
 
 	public void testResolverReturnsEngine() {
-		givenAnEngineResolver();
 		whenResolvingEngines();
 		thenEnginesAreResolved();
 	}
 
 	public void testNameForTargetIsRetrieved_WhenSpecifyingX86() {
-		givenAnEngineResolver();
 		whenResolvingEnginesForTarget("x86");
 		thenResolvedEngineNamesStringIs("Third Engine");
 	}
 
 	public void testResolverReturnsX86TargetEngines_WhenSpecifyingX86() {
-		givenAnEngineResolver();
 		whenResolvingEnginesForTarget("x86");
 		thenResolvedEnginesStringIs("example_engine_x86.jet");
 	}
 
 	public void testResolverReturnsAllArmTargetEngines_WhenSpecifyingArm() {
-		givenAnEngineResolver();
 		whenResolvingEnginesForTarget("armeabi");
-		thenResolvedEnginesStringIs("example_engine_arm.jet missing_engine.jet");
+		thenResolvedEnginesStringIs("example_engine_arm.jet lib_engine.so missing_engine.jet");
 	}
 
 	public void testResolverReturnsAllArmV7TargetEngines_WhenSpecifyingArmV7() {
-		givenAnEngineResolver();
 		whenResolvingEnginesForTarget("armeabi-v7a");
 		thenResolvedEnginesStringIs("example_engine_armv7.jet example_engine_arm.jet");
 	}
 
 	public void testFileOfFirstEngineCanBeRetrieved()
 			throws FileNotFoundException, IOException {
-		givenAnEngineResolver();
 		whenResolvingEngines();
 		thenFileOfFirstEngineCanBeRetrieved();
 	}
 
 	public void testFileOfFirstEngineIsExecutable()
 			throws FileNotFoundException, IOException {
-		givenAnEngineResolver();
 		whenResolvingEngines();
 		thenFileOfFirstEngineIsExecutable();
 	}
 
 	public void testFileOfSecondEngineCannotBeRetrievedIfFileIsMissing()
 			throws FileNotFoundException, IOException {
-		givenAnEngineResolver();
 		whenResolvingEnginesForTarget("armeabi");
 		thenRetrievingOfMissingFileThrowsFileNotFoundException();
+	}
+
+	public void testFileIsRetrievedFromLibraryPathIfMissingInAssetsFolder()
+			throws FileNotFoundException, IOException {
+		whenResolvingEnginesForTarget("armeabi");
+		thenRetrievingOfLibraryFilesSucceeds();
 	}
 
 	private void givenAnEngineResolver() {
@@ -106,17 +105,33 @@ public class ChessEngineResolverTest extends
 	private void thenFileOfFirstEngineCanBeRetrieved()
 			throws FileNotFoundException, IOException {
 		ChessEngine firstEngine = this.engines.get(0);
-		File copiedEngine = firstEngine.copyToFiles(this.getActivity()
-				.getContentResolver(), this.getActivity().getFilesDir());
+		File copiedEngine = copyEngine(firstEngine);
 		assertTrue(copiedEngine.exists());
 	}
 
 	private void thenFileOfFirstEngineIsExecutable()
 			throws FileNotFoundException, IOException {
 		ChessEngine firstEngine = this.engines.get(0);
-		File copiedEngine = firstEngine.copyToFiles(this.getActivity()
-				.getContentResolver(), this.getActivity().getFilesDir());
+		File copiedEngine = copyEngine(firstEngine);
 		assertTrue(copiedEngine.canExecute());
+	}
+
+	private void thenRetrievingOfLibraryFilesSucceeds()
+			throws FileNotFoundException, IOException {
+		ChessEngine testEngine = null;
+		for (ChessEngine engine : engines) {
+			if (engine.getName().equals("Engine in lib folder"))
+				testEngine = engine;
+		}
+		File copiedEngine = copyEngine(testEngine);
+		assertTrue(copiedEngine.exists());
+	}
+
+	private File copyEngine(ChessEngine engine) throws FileNotFoundException,
+			IOException {
+		File copiedEngine = engine.copyToFiles(this.getActivity()
+				.getContentResolver(), this.getActivity().getFilesDir());
+		return copiedEngine;
 	}
 
 	private void thenRetrievingOfMissingFileThrowsFileNotFoundException()
