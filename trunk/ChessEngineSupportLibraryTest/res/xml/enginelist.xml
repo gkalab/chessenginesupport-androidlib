@@ -5,21 +5,26 @@
         name="Example Engine v1.0"
         filename="example_engine_armv7.jet"
         target="armeabi-v7a"
-        type="uci" />
+        version="1.0"/>
     <engine
         name="Second Engine"
         filename="example_engine_arm.jet"
         target="armeabi|armeabi-v7a"
-        type="uci" />
+        version="1.0"/>
     <engine
         name="Third Engine"
         filename="example_engine_x86.jet"
         target="x86"
-        type="uci" />
+        version="1.0"/>
+    <engine
+        name="Engine in lib folder"
+        filename="lib_engine.so"
+        target="armeabi"
+        version="1.0"/>
     <engine
         name="Missing Engine"
         filename="missing_engine.jet"
         target="armeabi"
-        type="uci" />
+        version="1.0"/>
     
 </enginelist>
