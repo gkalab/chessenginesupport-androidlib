@@ -2,16 +2,8 @@
 <enginelist>
 
     <engine
-        name="Stockfish 4 arm"
-        filename="stockfish-4-android.armeabi.jet"
-        target="armeabi" />
-    <engine
-        name="Stockfish 4 armv7a"
-        filename="stockfish-4-android.armeabi-v7a.jet"
-        target="armeabi-v7a" />
-    <engine
-        name="Stockfish 4 x86"
-        filename="stockfish-4-android.x86.jet"
-        target="x86" />
-    
+        name="Stockfish 4"
+        filename="libstockfish-4-android.so"
+        target="armeabi|armeabi-v7a|x86" />
+
 </enginelist>
