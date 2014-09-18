@@ -92,8 +92,4 @@ public class ChessEngine {
     public String getPackageName() {
         return packageName;
     }
-
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
-    }
 }
