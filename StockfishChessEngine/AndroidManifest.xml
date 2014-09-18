@@ -32,7 +32,8 @@
 
         <provider
             android:name="com.kalab.chess.stockfishengine.StockfishEngineProvider"
-            android:authorities="com.kalab.chess.stockfishengine.StockfishEngineProvider" />
+            android:authorities="com.kalab.chess.stockfishengine.StockfishEngineProvider"
+            android:exported="true" />
     </application>
 
 </manifest>
