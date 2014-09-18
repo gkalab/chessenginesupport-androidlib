@@ -75,6 +75,11 @@ public class ChessEngineResolverTest extends
 		thenRetrievingOfLibraryFilesSucceeds();
 	}
 
+	public void testPackageNameIsProvidedInResolvedEngine() {
+		whenResolvingEngines();
+		thenFirstEngineProvidesPackageName("com.kalab.chess.enginesupport.test");
+	}
+
 	private void givenAnEngineResolver() {
 		this.resolver = new ChessEngineResolver(this.getActivity());
 	}
@@ -107,6 +112,11 @@ public class ChessEngineResolverTest extends
 		ChessEngine firstEngine = this.engines.get(0);
 		File copiedEngine = copyEngine(firstEngine);
 		assertTrue(copiedEngine.exists());
+	}
+
+	private void thenFirstEngineProvidesPackageName(String expected) {
+		ChessEngine firstEngine = this.engines.get(0);
+		assertEquals(expected, firstEngine.getPackageName());
 	}
 
 	private void thenFileOfFirstEngineIsExecutable()
