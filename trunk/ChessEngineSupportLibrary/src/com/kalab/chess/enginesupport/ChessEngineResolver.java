@@ -74,7 +74,7 @@ public class ChessEngineResolver {
 						int resId = resources.getIdentifier("enginelist",
 								"xml", packageName);
 						XmlResourceParser parser = resources.getXml(resId);
-						parseEngineListXml(parser, authority, result);
+						parseEngineListXml(parser, authority, result, packageName);
 					} catch (NameNotFoundException e) {
 						Log.e(TAG, e.getLocalizedMessage(), e);
 					}
@@ -85,7 +85,7 @@ public class ChessEngineResolver {
 	}
 
 	private void parseEngineListXml(XmlResourceParser parser, String authority,
-			List<ChessEngine> result) {
+			List<ChessEngine> result, String packageName) {
 		try {
 			int eventType = parser.getEventType();
 			while (eventType != XmlResourceParser.END_DOCUMENT) {
@@ -104,7 +104,7 @@ public class ChessEngineResolver {
 							for (String cpuTarget : targets) {
 								if (target.equals(cpuTarget)) {
 									result.add(new ChessEngine(title, fileName,
-											authority));
+											authority, packageName));
 								}
 							}
 						}

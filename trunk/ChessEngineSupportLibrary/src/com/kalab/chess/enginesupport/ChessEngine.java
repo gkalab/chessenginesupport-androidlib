@@ -30,11 +30,13 @@ public class ChessEngine {
 	private String name;
 	private String fileName;
 	private String authority;
+	private String packageName;
 
-	public ChessEngine(String name, String fileName, String authority) {
+	public ChessEngine(String name, String fileName, String authority, String packageName) {
 		this.name = name;
 		this.fileName = fileName;
 		this.authority = authority;
+		this.packageName = packageName;
 	}
 
 	public String getName() {
@@ -86,4 +88,12 @@ public class ChessEngine {
 			Log.e(TAG, e.getMessage(), e);
 		}
 	}
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 }
