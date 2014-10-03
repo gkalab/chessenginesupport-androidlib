@@ -46,6 +46,11 @@ public class ChessEngineResolverTest extends
 		thenResolvedEnginesStringIs("example_engine_arm.jet lib_engine.so missing_engine.jet");
 	}
 
+	public void testResolverReturnsAllArmTargetEngines_WhenSpecifyingArmV6l() {
+		whenResolvingEnginesForTarget("armeabi-v6l");
+		thenResolvedEnginesStringIs("example_engine_arm.jet lib_engine.so missing_engine.jet");
+	}
+
 	public void testResolverReturnsAllArmV7TargetEngines_WhenSpecifyingArmV7() {
 		whenResolvingEnginesForTarget("armeabi-v7a");
 		thenResolvedEnginesStringIs("example_engine_armv7.jet example_engine_arm.jet");
