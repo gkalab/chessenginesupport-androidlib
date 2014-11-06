@@ -13,6 +13,8 @@
  */
 package com.kalab.chess.enginesupport;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -50,6 +53,11 @@ public class ChessEngineResolver {
 		}
 	}
 
+	/**
+	 * Return the list of all engines provided for the current target system
+	 *
+	 * @return List<ChessEngine> of engines provided
+	 */
 	public List<ChessEngine> resolveEngines() {
 		List<ChessEngine> result = new ArrayList<ChessEngine>();
 		final Intent intent = new Intent(ENGINE_PROVIDER_MARKER);
@@ -81,7 +89,8 @@ public class ChessEngineResolver {
 						int resId = resources.getIdentifier("enginelist",
 								"xml", packageName);
 						XmlResourceParser parser = resources.getXml(resId);
-						parseEngineListXml(parser, authority, result, packageName);
+						parseEngineListXml(parser, authority, result,
+								packageName);
 					} catch (NameNotFoundException e) {
 						Log.e(TAG, e.getLocalizedMessage(), e);
 					}
@@ -96,25 +105,9 @@ public class ChessEngineResolver {
 		try {
 			int eventType = parser.getEventType();
 			while (eventType != XmlResourceParser.END_DOCUMENT) {
-				String name = null;
 				try {
 					if (eventType == XmlResourceParser.START_TAG) {
-						name = parser.getName();
-						if (name.equalsIgnoreCase("engine")) {
-							String fileName = parser.getAttributeValue(null,
-									"filename");
-							String title = parser.getAttributeValue(null,
-									"name");
-							String targetSpecification = parser
-									.getAttributeValue(null, "target");
-							String[] targets = targetSpecification.split("\\|");
-							for (String cpuTarget : targets) {
-								if (target.equals(cpuTarget)) {
-									result.add(new ChessEngine(title, fileName,
-											authority, packageName));
-								}
-							}
-						}
+						addEngine(result, parser, authority, packageName);
 					}
 					eventType = parser.next();
 				} catch (IOException e) {
@@ -126,10 +119,86 @@ public class ChessEngineResolver {
 		}
 	}
 
+	private void addEngine(List<ChessEngine> result, XmlResourceParser parser,
+			String authority, String packageName) {
+		if (parser.getName().equalsIgnoreCase("engine")) {
+			String fileName = parser.getAttributeValue(null, "filename");
+			String title = parser.getAttributeValue(null, "name");
+			String targetSpecification = parser.getAttributeValue(null,
+					"target");
+			String[] targets = targetSpecification.split("\\|");
+			for (String cpuTarget : targets) {
+				if (target.equals(cpuTarget)) {
+					int versionCode = 0;
+					try {
+						versionCode = context.getPackageManager()
+								.getPackageInfo(packageName, 0).versionCode;
+					} catch (NameNotFoundException e) {
+						Log.e(TAG, e.getMessage());
+					}
+					result.add(new ChessEngine(title, fileName, authority,
+							packageName, versionCode));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Ensure that the engine is current. It re-copies the engine if it was not
+	 * current.
+	 *
+	 * @param fileName
+	 *            the file name of the engine
+	 * @param packageName
+	 *            the package name of the engine
+	 * @param versionCode
+	 *            the (installed) version code of the engine
+	 * @param destination
+	 *            the destination folder to copy a new engine to
+	 * @return the new version of the engine, -1 in case of an error (IOError or
+	 *         if no engine was found)
+	 */
+	public int ensureEngineVersion(String fileName, String packageName,
+			int versionCode, File destination) {
+		int result = -1;
+		PackageInfo packageInfo;
+		Log.d(TAG, "checking engine " + fileName + ", " + packageName
+				+ ", version " + versionCode);
+		try {
+			packageInfo = context.getPackageManager().getPackageInfo(
+					packageName, 0);
+			if (packageInfo.versionCode > versionCode) {
+				// package is updated, need to copy engine again
+				for (ChessEngine engine : resolveEngines()) {
+					if (engine.getPackageName().equals(packageName)
+							&& engine.getFileName().equals(fileName)) {
+						try {
+							Log.d(TAG, "engine is outdated");
+							engine.copyToFiles(context.getContentResolver(),
+									destination);
+							result = packageInfo.versionCode;
+						} catch (FileNotFoundException e) {
+							Log.e(TAG, e.getMessage(), e);
+						} catch (IOException e) {
+							Log.e(TAG, e.getMessage(), e);
+						}
+						break;
+					}
+				}
+			} else {
+				Log.d(TAG, "engine is up-to-date");
+				result = packageInfo.versionCode;
+			}
+		} catch (NameNotFoundException e) {
+			Log.w(TAG, "package " + packageName + " not found");
+		}
+		return result;
+	}
+
 	/**
 	 * Don't use this in production - this method is only for testing. Set the
 	 * cpu target.
-	 * 
+	 *
 	 * @param target
 	 *            the cpu target to set
 	 */

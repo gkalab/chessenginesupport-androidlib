@@ -31,12 +31,15 @@ public class ChessEngine {
 	private String fileName;
 	private String authority;
 	private String packageName;
+	private int versionCode;
 
-	public ChessEngine(String name, String fileName, String authority, String packageName) {
+	public ChessEngine(String name, String fileName, String authority,
+			String packageName, int versionCode) {
 		this.name = name;
 		this.fileName = fileName;
 		this.authority = authority;
 		this.packageName = packageName;
+		this.versionCode = versionCode;
 	}
 
 	public String getName() {
@@ -79,7 +82,8 @@ public class ChessEngine {
 		fout.close();
 	}
 
-	private void setExecutablePermission(String engineFileName) throws IOException {
+	private void setExecutablePermission(String engineFileName)
+			throws IOException {
 		String cmd[] = { "chmod", "744", engineFileName };
 		Process process = Runtime.getRuntime().exec(cmd);
 		try {
@@ -89,7 +93,15 @@ public class ChessEngine {
 		}
 	}
 
-    public String getPackageName() {
-        return packageName;
-    }
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public int getVersionCode() {
+		return versionCode;
+	}
+
+	public String getAuthority() {
+		return authority;
+	}
 }

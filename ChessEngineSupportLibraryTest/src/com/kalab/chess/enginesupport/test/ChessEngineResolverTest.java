@@ -3,6 +3,7 @@ package com.kalab.chess.enginesupport.test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.test.ActivityInstrumentationTestCase2;
@@ -21,6 +22,7 @@ public class ChessEngineResolverTest extends
 		super(ExampleActivity.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		givenAnEngineResolver();
@@ -85,31 +87,72 @@ public class ChessEngineResolverTest extends
 		thenFirstEngineProvidesPackageName("com.kalab.chess.enginesupport.test");
 	}
 
+	public void testVersionCodeIsProvidedInResolvedEngine() {
+		whenResolvingEngines();
+		thenFirstEngineProvidesVersionCode(1);
+	}
+
+	public void testFileIsRecopiedIfVersionInDestinationFolderIsOld()
+			throws FileNotFoundException, IOException {
+		givenResolvedEngines();
+		File engineFile = whenEnsuringEngineVersionWithOldVersion();
+		thenEngineIsUpdated(engineFile);
+	}
+
+	public void testFileIsNotCopiedIfVersionInDestinationFolderIsTheSame()
+			throws FileNotFoundException, IOException {
+		givenResolvedEngines();
+		File engineFile = whenEnsuringEngineVersionWithCurrentVersion();
+		thenEngineIsNotUpdated(engineFile);
+	}
+
 	private void givenAnEngineResolver() {
 		this.resolver = new ChessEngineResolver(this.getActivity());
 	}
 
-	private void whenResolvingEngines() {
-		this.engines = this.resolver.resolveEngines();
+	private void givenResolvedEngines() {
+		whenResolvingEnginesForTarget("armeabi");
 	}
 
 	private void whenResolvingEnginesForTarget(String target) {
 		this.resolver.setTarget(target);
-		this.engines = this.resolver.resolveEngines();
+		whenResolvingEngines();
+	}
+
+	private void whenResolvingEngines() {
+		this.engines = new ArrayList<ChessEngine>();
+		for (ChessEngine engine : this.resolver.resolveEngines()) {
+			if (engine.getAuthority().equals(
+					"com.kalab.chess.example.ExampleEngineProvider")) {
+				this.engines.add(engine);
+			}
+		}
+	}
+
+	private File whenEnsuringEngineVersionWithCurrentVersion()
+			throws FileNotFoundException, IOException {
+		ChessEngine engine = this.engines.get(0);
+		int currentVersion = engine.getVersionCode();
+		return ensureVersion(engine, currentVersion);
+	}
+
+	private File whenEnsuringEngineVersionWithOldVersion()
+			throws FileNotFoundException, IOException {
+		ChessEngine engine = this.engines.get(0);
+		return ensureVersion(engine, engine.getVersionCode() - 1);
+	}
+
+	private File ensureVersion(ChessEngine engine, int version)
+			throws FileNotFoundException, IOException {
+		File engineFile = copyEngine(engine);
+		assertTrue(engineFile.delete());
+		this.resolver.ensureEngineVersion(engine.getFileName(), engine
+				.getPackageName(), version, this.getActivity().getFilesDir());
+		return engineFile;
 	}
 
 	private void thenEnginesAreResolved() {
 		assertTrue(this.engines.size() > 0);
-	}
-
-	private void thenNameOfFirstEngineIs(String expected) {
-		ChessEngine firstEngine = this.engines.get(0);
-		assertEquals(expected, firstEngine.getName());
-	}
-
-	private void thenFileNameOfFirstEngineIs(String expected) {
-		ChessEngine firstEngine = this.engines.get(0);
-		assertEquals(expected, firstEngine.getFileName());
 	}
 
 	private void thenFileOfFirstEngineCanBeRetrieved()
@@ -119,9 +162,22 @@ public class ChessEngineResolverTest extends
 		assertTrue(copiedEngine.exists());
 	}
 
+	private void thenEngineIsUpdated(File copiedEngine) {
+		assertTrue(copiedEngine.exists());
+	}
+
+	private void thenEngineIsNotUpdated(File copiedEngine) {
+		assertFalse(copiedEngine.exists());
+	}
+
 	private void thenFirstEngineProvidesPackageName(String expected) {
 		ChessEngine firstEngine = this.engines.get(0);
 		assertEquals(expected, firstEngine.getPackageName());
+	}
+
+	private void thenFirstEngineProvidesVersionCode(int expected) {
+		ChessEngine firstEngine = this.engines.get(0);
+		assertEquals(expected, firstEngine.getVersionCode());
 	}
 
 	private void thenFileOfFirstEngineIsExecutable()
