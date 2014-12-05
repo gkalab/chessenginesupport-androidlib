@@ -17,6 +17,7 @@ public class ChessEngineResolverTest extends
 
 	private ChessEngineResolver resolver;
 	private List<ChessEngine> engines;
+	private long oldTime;
 
 	public ChessEngineResolverTest() {
 		super(ExampleActivity.class);
@@ -99,7 +100,14 @@ public class ChessEngineResolverTest extends
 		thenEngineIsUpdated(engineFile);
 	}
 
-	public void testFileIsNotCopiedIfVersionInDestinationFolderIsTheSame()
+	public void testFileIsReCopiedIfVersionIsTheSameAndFileInDestinationFolderIsMissing()
+			throws FileNotFoundException, IOException {
+		givenResolvedEngines();
+		File engineFile = whenEnsuringEngineVersionWithCurrentVersionAndMissingFile();
+		thenEngineIsUpdated(engineFile);
+	}
+
+	public void testFileIsNotReCopiedIfVersionInDestinationFolderIsTheSameAndFileExistsInDestinationFolder()
 			throws FileNotFoundException, IOException {
 		givenResolvedEngines();
 		File engineFile = whenEnsuringEngineVersionWithCurrentVersion();
@@ -133,22 +141,43 @@ public class ChessEngineResolverTest extends
 			throws FileNotFoundException, IOException {
 		ChessEngine engine = this.engines.get(0);
 		int currentVersion = engine.getVersionCode();
+		File engineFile = copyEngine(engine);
+		return ensureVersion(engine, currentVersion);
+	}
+
+	private File whenEnsuringEngineVersionWithCurrentVersionAndMissingFile()
+			throws FileNotFoundException, IOException {
+		ChessEngine engine = this.engines.get(0);
+		int currentVersion = engine.getVersionCode();
+		File engineFile = copyEngine(engine);
+		engineFile.delete();
+		try {
+			// need to sleep for one sec because file time is only in seconds
+			Thread.sleep(1001);
+		} catch (InterruptedException e) {
+		}
 		return ensureVersion(engine, currentVersion);
 	}
 
 	private File whenEnsuringEngineVersionWithOldVersion()
 			throws FileNotFoundException, IOException {
 		ChessEngine engine = this.engines.get(0);
+		File engineFile = copyEngine(engine);
+		try {
+			// need to sleep for one sec because file time is only in seconds
+			Thread.sleep(1001);
+		} catch (InterruptedException e) {
+		}
 		return ensureVersion(engine, engine.getVersionCode() - 1);
 	}
 
 	private File ensureVersion(ChessEngine engine, int version)
 			throws FileNotFoundException, IOException {
-		File engineFile = copyEngine(engine);
-		assertTrue(engineFile.delete());
+		String fileName = new File(this.getActivity().getFilesDir(),
+				engine.getFileName()).getAbsolutePath();
 		this.resolver.ensureEngineVersion(engine.getFileName(), engine
 				.getPackageName(), version, this.getActivity().getFilesDir());
-		return engineFile;
+		return new File(fileName);
 	}
 
 	private void thenEnginesAreResolved() {
@@ -164,10 +193,11 @@ public class ChessEngineResolverTest extends
 
 	private void thenEngineIsUpdated(File copiedEngine) {
 		assertTrue(copiedEngine.exists());
+		assertFalse(oldTime == copiedEngine.lastModified());
 	}
 
 	private void thenEngineIsNotUpdated(File copiedEngine) {
-		assertFalse(copiedEngine.exists());
+		assertEquals(oldTime, copiedEngine.lastModified());
 	}
 
 	private void thenFirstEngineProvidesPackageName(String expected) {
@@ -202,6 +232,7 @@ public class ChessEngineResolverTest extends
 			IOException {
 		File copiedEngine = engine.copyToFiles(this.getActivity()
 				.getContentResolver(), this.getActivity().getFilesDir());
+		this.oldTime = copiedEngine.lastModified();
 		return copiedEngine;
 	}
 
