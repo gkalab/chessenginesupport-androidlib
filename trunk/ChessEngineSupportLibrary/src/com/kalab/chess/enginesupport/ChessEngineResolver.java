@@ -167,8 +167,10 @@ public class ChessEngineResolver {
 		try {
 			packageInfo = context.getPackageManager().getPackageInfo(
 					packageName, 0);
-			if (packageInfo.versionCode > versionCode) {
-				// package is updated, need to copy engine again
+			if (packageInfo.versionCode > versionCode
+					|| !(new File(destination, fileName).exists())) {
+				// package is updated or file is missing, need to copy engine
+				// again
 				for (ChessEngine engine : resolveEngines()) {
 					if (engine.getPackageName().equals(packageName)
 							&& engine.getFileName().equals(fileName)) {
