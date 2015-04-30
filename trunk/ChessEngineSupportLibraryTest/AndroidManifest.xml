@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.kalab.chess.enginesupport.test"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.1" >
 
     <uses-sdk android:minSdkVersion="9" />
 
@@ -20,15 +20,23 @@
             <intent-filter>
                 <action android:name="intent.chess.provider.ENGINE" />
             </intent-filter>
-
+            <intent-filter>
+                <action android:name="intent.chess.provider.ACTIVATION" />
+            </intent-filter>
+            
             <meta-data
                 android:name="chess.provider.engine.authority"
                 android:value="com.kalab.chess.example.ExampleEngineProvider" />
         </activity>
 
+        
+        <activity android:name="com.kalab.chess.example.ActivityForResult" >
+        </activity>
+        
         <provider
             android:name="com.kalab.chess.example.ExampleEngineProvider"
-            android:authorities="com.kalab.chess.example.ExampleEngineProvider" >
+            android:authorities="com.kalab.chess.example.ExampleEngineProvider"
+            android:exported="true" >
         </provider>
     </application>
 
