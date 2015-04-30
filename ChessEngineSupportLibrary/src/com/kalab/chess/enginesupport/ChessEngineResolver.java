@@ -17,12 +17,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -36,9 +40,13 @@ import android.util.Log;
 public class ChessEngineResolver {
 
 	private static final String ENGINE_PROVIDER_MARKER = "intent.chess.provider.ENGINE";
+	/** marker used to mark engines which need license checking */
+	private static final String ENGINE_PROVIDER_LICENSE_MARKER = "intent.chess.provider.ACTIVATION";
 	private static final String TAG = ChessEngineResolver.class.getSimpleName();
 	private Context context;
 	private String target;
+	/** map of package -> activity for license checks */
+	Map<String, String> licenseCheckActivities = new HashMap<String, String>();
 
 	public ChessEngineResolver(Context context) {
 		super();
@@ -59,15 +67,36 @@ public class ChessEngineResolver {
 	 * @return List<ChessEngine> of engines provided
 	 */
 	public List<ChessEngine> resolveEngines() {
+		resolveLicenseCheckActivitiesPerPackage();
 		List<ChessEngine> result = new ArrayList<ChessEngine>();
-		final Intent intent = new Intent(ENGINE_PROVIDER_MARKER);
-		List<ResolveInfo> list = context.getPackageManager()
-				.queryIntentActivities(intent, PackageManager.GET_META_DATA);
-		for (ResolveInfo resolveInfo : list) {
+		final Intent engineProviderIntent = new Intent(ENGINE_PROVIDER_MARKER);
+		List<ResolveInfo> engineProviderList = context.getPackageManager()
+				.queryIntentActivities(engineProviderIntent,
+						PackageManager.GET_META_DATA);
+		for (ResolveInfo resolveInfo : engineProviderList) {
 			String packageName = resolveInfo.activityInfo.packageName;
 			result = resolveEnginesForPackage(result, resolveInfo, packageName);
 		}
 		return result;
+	}
+
+	/**
+	 * Resolve all the license check activities and put them into a map for
+	 * later retrieval.
+	 */
+	private void resolveLicenseCheckActivitiesPerPackage() {
+		final Intent engineLicenseIntent = new Intent(
+				ENGINE_PROVIDER_LICENSE_MARKER);
+		List<ResolveInfo> engineLicenseProviderList = context
+				.getPackageManager().queryIntentActivities(engineLicenseIntent,
+						PackageManager.GET_META_DATA);
+		for (ResolveInfo resolveInfo : engineLicenseProviderList) {
+			String packageName = resolveInfo.activityInfo.packageName;
+			if (packageName != null) {
+				ActivityInfo activityInfo = resolveInfo.activityInfo;
+				licenseCheckActivities.put(packageName, activityInfo.name);
+			}
+		}
 	}
 
 	private List<ChessEngine> resolveEnginesForPackage(
@@ -137,7 +166,8 @@ public class ChessEngineResolver {
 						Log.e(TAG, e.getMessage());
 					}
 					result.add(new ChessEngine(title, fileName, authority,
-							packageName, versionCode));
+							packageName, versionCode, licenseCheckActivities
+									.get(packageName)));
 				}
 			}
 		}
@@ -195,6 +225,33 @@ public class ChessEngineResolver {
 			Log.w(TAG, "package " + packageName + " not found");
 		}
 		return result;
+	}
+
+	/**
+	 * Check the license of an engine.
+	 *
+	 * @param caller
+	 *            the activity which makes the license check
+	 * @param requestCode
+	 *            if >= 0, this code will be returned in onActivityResult() when the license check exits
+	 * @param fileName
+	 *            the file name of the engine
+	 * @param packageName
+	 *            the package name of the engine
+	 * @return true if a license check is performed, false if there is no need for a license check.
+	 *            If a license check is performed the caller must check the result in onActivityResult()
+	 */
+	public boolean checkLicense(Activity caller, int requestCode,
+			String fileName, String packageName) {
+		Log.d(TAG, "checking license for engine " + fileName + ", "
+				+ packageName);
+		for (ChessEngine engine : resolveEngines()) {
+			if (engine.getPackageName().equals(packageName)
+					&& engine.getFileName().equals(fileName)) {
+				return engine.checkLicense(caller, requestCode);
+			}
+		}
+		return false;
 	}
 
 	/**
