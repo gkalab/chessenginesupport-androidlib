@@ -17,12 +17,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import android.annotation.TargetApi;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -53,8 +55,8 @@ public class ChessEngineProvider extends ContentProvider {
 					"Engine file <"
 							+ fileName
 							+ "> was not found in assets, trying to load from libraries.");
-			String libFileName = getContext().getApplicationInfo().dataDir
-					+ File.separator + "lib" + File.separator + fileName;
+			String libFileName = getNativeLibraryDir() + File.separator
+					+ fileName;
 			try {
 				descriptor = new AssetFileDescriptor(openLibFile(new File(
 						libFileName)), 0, AssetFileDescriptor.UNKNOWN_LENGTH);
@@ -66,6 +68,16 @@ public class ChessEngineProvider extends ContentProvider {
 			}
 		}
 		return descriptor;
+	}
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	private String getNativeLibraryDir() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+			return getContext().getApplicationInfo().nativeLibraryDir;
+		} else {
+			return getContext().getApplicationInfo().dataDir + File.separator
+					+ "lib";
+		}
 	}
 
 	public ParcelFileDescriptor openLibFile(File f)
