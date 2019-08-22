@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<enginelist>
-
-    <engine
-        name="Stockfish 4"
-        filename="libstockfish-4-android.so"
-        target="armeabi|armeabi-v7a|x86" />
-
-</enginelist>

@@ -2,11 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kalab.chess.stockfishengine"
     android:versionCode="1"
-    android:versionName="4" >
-
-    <uses-sdk
-        android:minSdkVersion="7"
-        android:targetSdkVersion="18" />
+    android:versionName="10" >
 
     <application
         android:allowBackup="true"
