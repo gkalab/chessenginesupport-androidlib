@@ -48,5 +48,5 @@ public class YourEngineProvider extends ChessEngineProvider {
 ```
   * add the file enginelist.xml to your project under res/xml/ (see example enginelist.xml of this project)
   * make sure your engine looks like a library, e.g. name your engine executable libXXX.so where XXX is the name of your engine
-  * put the engine executables for the various targets under libs/armeabi, libs/armeabi-v7a, libs/x86, etc.
+  * put the engine executables for the various targets under src/main/jniLibs/armeabi, src/main/jniLibs/armeabi-v7a, src/main/jniLibs/x86, etc.
   * you can put more than one engine into one app (demonstrated here with asmFish for x86_64)
