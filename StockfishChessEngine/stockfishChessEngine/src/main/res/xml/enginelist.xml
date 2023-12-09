@@ -2,13 +2,8 @@
 <enginelist>
 
     <engine
-        name="Stockfish 10"
-        filename="libstockfish.so"
-        target="armeabi|armeabi-v7a|arm64-v8a|x86|x86_64|mips|mips64" />
-
-    <engine
-        name="asmFish 9"
-        filename="asmFishL_9_popcnt.so"
-        target="x86_64" />
+        name="StockfishSmallNPS 16"
+        filename="libsf.so"
+        target="arm64-v8a|armeabi-v7a" />
 
 </enginelist>
